@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { AVATARS, PAST_MEETING_RECAPS } from '../data/mockWorkspace';
 import { Avatar } from '../components/common/Avatar';
@@ -19,6 +19,7 @@ export const MeetingsPage: React.FC = () => {
     documents,
     setPreviewDoc,
     setScreenShareOpen,
+    setPrivacyModalOpen,
     activeScreenName,
     notify,
   } = useWorkspace();
@@ -33,6 +34,9 @@ export const MeetingsPage: React.FC = () => {
   const [muted, setMuted] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
   const [handRaised, setHandRaised] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [stageLayout, setStageLayout] = useState<'focus' | 'grid' | 'sidebar'>('focus');
+  const [callSeconds, setCallSeconds] = useState(42 * 60 + 18);
   const [chamberNotes, setChamberNotes] = useState(
     `### Consensus Notes:\n- SQLite WASM OPFS backing approved for desktop electron build.\n- WebRTC mesh limit pegged at 12 active video peers before server SFU fallback.\n> Esther: Benchmarking write ops with 50,000 synthetic rows tonight.`,
   );
@@ -41,6 +45,18 @@ export const MeetingsPage: React.FC = () => {
   const [rfcDismissed, setRfcDismissed] = useState(false);
   const [customActionInput, setCustomActionInput] = useState('');
   const [addingCustomAction, setAddingCustomAction] = useState(false);
+
+  useEffect(() => {
+    if (meetingSubView !== 'chamber') return;
+    const id = window.setInterval(() => setCallSeconds((s) => s + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [meetingSubView]);
+
+  const formattedCallTimer = [
+    String(Math.floor(callSeconds / 3600)).padStart(2, '0'),
+    String(Math.floor((callSeconds % 3600) / 60)).padStart(2, '0'),
+    String(callSeconds % 60).padStart(2, '0'),
+  ].join(':');
 
   const openDocByName = (name: string) => {
     const found = documents.find((d) => d.name === name) ?? documents[0];
@@ -86,7 +102,7 @@ export const MeetingsPage: React.FC = () => {
                 </span>
               </div>
               <p className="font-code-inline text-[11px] text-on-surface-variant flex flex-wrap items-center gap-2 mt-0.5">
-                <span className="text-primary font-bold">00:42:18</span>
+                <span className="text-primary font-bold">{formattedCallTimer}</span>
                 <span>•</span>
                 <span>E2EE WebRTC Mesh (Zero-Knowledge)</span>
                 <span>•</span>
@@ -111,42 +127,50 @@ export const MeetingsPage: React.FC = () => {
                   {ini}
                 </div>
               ))}
-              <div className="w-7 h-7 rounded-full bg-surface-container text-on-surface text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
+              <div className="w-7 h-7 rounded-full bg-primary text-on-primary text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
                 +2
               </div>
             </div>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low font-label-sm text-label-sm font-semibold text-on-surface">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((s) => !s)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-colors ${
+                sidebarOpen
+                  ? 'bg-surface-container hover:bg-surface-container-high text-on-surface'
+                  : 'bg-surface-container-low text-on-surface-variant'
+              }`}
+            >
               <span className="material-symbols-outlined text-[15px] text-primary">
                 auto_awesome
               </span>
               <span>AI Co-Pilot</span>
               <span className="w-2 h-2 rounded-full bg-primary-container" />
-            </span>
+            </button>
 
             <button
               type="button"
               onClick={() => setScreenShareOpen(true)}
-              title="Audio/Video Settings & Share Picker"
-              className="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-secondary transition-colors"
+              title="Chamber Settings & Share Source"
+              className="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">tune</span>
             </button>
             <button
               type="button"
-              onClick={() => setScreenShareOpen(true)}
-              title="Share Screen or Window"
+              onClick={() => setStageLayout((l) => (l === 'grid' ? 'focus' : 'grid'))}
+              title="Toggle stage grid layout"
               className="w-9 h-9 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center hover:bg-primary-fixed-dim transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">present_to_all</span>
+              <span className="material-symbols-outlined text-[18px]">open_in_new</span>
             </button>
           </div>
         </div>
 
         {/* Main Chamber Stage + Co-Pilot Sidebar */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-          {/* Video + Screen Share Stage (8 cols) */}
-          <div className="xl:col-span-8 space-y-4">
+          {/* Video + Screen Share Stage */}
+          <div className={`${sidebarOpen ? 'xl:col-span-8' : 'xl:col-span-12'} space-y-4 transition-all duration-300`}>
             {/* Shared Screen Stage */}
             <div className="relative rounded-2xl bg-[#0e1b26] overflow-hidden shadow-lg p-4 min-h-[420px] flex flex-col justify-between border border-inverse-surface">
               {/* Top stage HUD */}
@@ -166,20 +190,29 @@ export const MeetingsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setScreenShareOpen(true)}
-                    className="px-2.5 py-1 rounded-full bg-black/40 hover:bg-black/60 text-white font-label-sm text-label-sm flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-full bg-black/45 hover:bg-black/65 text-white font-label-sm text-label-sm flex items-center gap-1 transition-colors"
                   >
                     <span className="material-symbols-outlined text-[14px]">fit_screen</span>
-                    <span>Switch Source</span>
+                    <span>Fit</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSidebarOpen((s) => !s)}
+                    title={sidebarOpen ? 'Expand full stage' : 'Restore sidebar'}
+                    className="p-1.5 rounded-full bg-black/45 hover:bg-black/65 text-white transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">fullscreen</span>
                   </button>
                 </div>
               </div>
 
               {/* Architecture CRDT Protocol Diagram */}
-              <div className="my-4 relative z-10 flex flex-col items-center justify-center">
+              <div className="my-4 relative z-10 flex flex-col items-center justify-center gap-2.5">
                 <div className="w-full max-w-2xl rounded-xl bg-[#0a141d]/85 border border-primary-container/25 p-5 space-y-4">
-                  <div className="flex items-center justify-between text-[11px] font-mono text-primary-container">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-primary-container">
                     <span>Architecture: Local-First Sync Protocol</span>
-                    <span className="px-2 py-0.5 rounded bg-primary-container/15">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-container/15 text-inverse-on-surface">
+                      <span className="w-2 h-2 rounded-full bg-primary-container animate-ping" />
                       crdt_sync_engine.rs: Line 184 — Batch reconciliation state
                     </span>
                   </div>
@@ -228,32 +261,71 @@ export const MeetingsPage: React.FC = () => {
               </div>
 
               {/* Live Speaker Caption Overlay */}
-              <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-                <div className="max-w-xl rounded-xl bg-black/65 backdrop-blur-md p-3.5 border border-white/10 text-white">
-                  <div className="flex items-center justify-between gap-3 mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-primary-container text-on-primary-container font-bold text-[10px] flex items-center justify-center">
-                        EV
-                      </span>
+              <div className="relative z-10 flex flex-col gap-2.5 w-full">
+                <div className="max-w-2xl mx-auto w-full rounded-xl bg-black/65 backdrop-blur-md p-3.5 border border-white/10 text-white flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                    EV
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-3 mb-0.5">
                       <span className="font-label-sm text-label-sm font-bold text-primary-fixed">
                         Esther V.
                       </span>
+                      <span className="font-code-inline text-[10px] text-primary-container">
+                        Live (Confidence 99.4%)
+                      </span>
                     </div>
-                    <span className="font-code-inline text-[10px] text-primary-container">
-                      Live (Confidence 99.4%)
-                    </span>
+                    <p className="font-body-sm text-body-sm text-white/90">
+                      &ldquo;...CRDT convergence check has been verified across all peer nodes. The
+                      deterministic index guarantees zero merge conflicts under extreme split-brain
+                      scenarios.&rdquo;
+                    </p>
                   </div>
-                  <p className="font-body-sm text-body-sm text-white/90">
-                    &ldquo;...CRDT convergence check has been verified across all peer nodes. The
-                    deterministic index guarantees zero merge conflicts under extreme split-brain
-                    scenarios.&rdquo;
-                  </p>
+                  <span className="material-symbols-outlined text-[16px] text-primary-container shrink-0 self-center">
+                    graphic_eq
+                  </span>
                 </div>
 
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/55 text-white font-label-sm text-label-sm">
-                  <span className="w-2 h-2 rounded-full bg-primary-container" />
-                  <span>Esther Voronova</span>
-                </span>
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-white font-label-sm text-label-sm">
+                    <span className="w-2 h-2 rounded-full bg-primary-container" />
+                    <span>Esther Voronova</span>
+                    <div className="flex items-end gap-0.5 h-3 ml-0.5">
+                      <div className="w-0.5 h-3 bg-primary-container animate-pulse" />
+                      <div className="w-0.5 h-1.5 bg-primary-container animate-pulse" />
+                      <div className="w-0.5 h-2.5 bg-primary-container animate-pulse" />
+                      <div className="w-0.5 h-1 bg-primary-container" />
+                    </div>
+                  </div>
+
+                  {/* Stage layout switcher pills */}
+                  <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md p-1 rounded-full text-white">
+                    {(
+                      [
+                        { id: 'focus', icon: 'featured_video', title: 'Focus view' },
+                        { id: 'grid', icon: 'grid_view', title: 'Equal Grid view' },
+                        { id: 'sidebar', icon: 'view_sidebar', title: 'Sidebar Stage' },
+                      ] as const
+                    ).map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          setStageLayout(m.id);
+                          setSidebarOpen(m.id !== 'grid');
+                        }}
+                        title={m.title}
+                        className={`p-1 rounded-full transition-colors ${
+                          stageLayout === m.id
+                            ? 'bg-white/25 text-white'
+                            : 'text-white/70 hover:bg-white/10'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">{m.icon}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -340,6 +412,7 @@ export const MeetingsPage: React.FC = () => {
           </div>
 
           {/* Right Column: Manav.AI Chamber Sync (4 cols) */}
+          {sidebarOpen && (
           <div className="xl:col-span-4 bg-surface-container-lowest rounded-2xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -518,24 +591,25 @@ export const MeetingsPage: React.FC = () => {
               </button>
             </div>
           </div>
+          )}
         </div>
 
         {/* Bottom Floating Call Control Dock */}
-        <div className="flex justify-center pt-1">
-          <div className="inline-flex flex-wrap items-center gap-2 bg-surface-container-lowest px-3 py-2 rounded-full shadow-xl border border-surface-container">
+        <div className="sticky bottom-4 z-30 flex justify-center pt-1">
+          <div className="inline-flex flex-wrap items-center gap-2 bg-surface-container-lowest/90 backdrop-blur-xl px-3 py-2 rounded-full shadow-xl border border-white/80">
             <button
               type="button"
               onClick={() => setMuted((m) => !m)}
               className={`px-3.5 py-2 rounded-full font-label-md text-label-md font-semibold flex items-center gap-1.5 transition-colors ${
                 muted
                   ? 'bg-error-container text-on-error-container'
-                  : 'bg-surface-container-low text-on-surface hover:bg-surface-container'
+                  : 'bg-surface-container text-on-surface hover:bg-surface-container-high'
               }`}
             >
-              <span className="material-symbols-outlined text-[17px]">
+              <span className={`material-symbols-outlined text-[17px] ${muted ? 'text-error' : 'text-primary'}`}>
                 {muted ? 'mic_off' : 'mic'}
               </span>
-              <span>{muted ? 'Muted' : 'Mute'}</span>
+              <span>{muted ? 'Unmute' : 'Mute'}</span>
             </button>
 
             <button
@@ -544,10 +618,10 @@ export const MeetingsPage: React.FC = () => {
               className={`px-3.5 py-2 rounded-full font-label-md text-label-md font-semibold flex items-center gap-1.5 transition-colors ${
                 !cameraOn
                   ? 'bg-error-container text-on-error-container'
-                  : 'bg-surface-container-low text-on-surface hover:bg-surface-container'
+                  : 'bg-surface-container text-on-surface hover:bg-surface-container-high'
               }`}
             >
-              <span className="material-symbols-outlined text-[17px]">
+              <span className={`material-symbols-outlined text-[17px] ${!cameraOn ? 'text-error' : 'text-primary'}`}>
                 {cameraOn ? 'videocam' : 'videocam_off'}
               </span>
               <span>Camera</span>
@@ -556,9 +630,9 @@ export const MeetingsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setScreenShareOpen(true)}
-              className="px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center gap-1.5 hover:bg-secondary transition-colors"
+              className="px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center gap-1.5 hover:bg-secondary transition-colors shadow-sm"
             >
-              <span className="material-symbols-outlined text-[17px]">present_to_all</span>
+              <span className="material-symbols-outlined text-[17px]">screen_share</span>
               <span>Presenting</span>
             </button>
 
@@ -571,21 +645,32 @@ export const MeetingsPage: React.FC = () => {
               className={`px-3.5 py-2 rounded-full font-label-md text-label-md font-semibold flex items-center gap-1.5 transition-colors ${
                 handRaised
                   ? 'bg-primary-container text-on-primary-container'
-                  : 'bg-surface-container-low text-on-surface hover:bg-surface-container'
+                  : 'bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high'
               }`}
             >
-              <span className="material-symbols-outlined text-[17px]">back_hand</span>
+              <span className="material-symbols-outlined text-[17px]">front_hand</span>
               <span>Raise</span>
             </button>
 
             <button
               type="button"
               onClick={() => notify('Sent 👍 encrypted reaction to peer mesh.')}
-              className="px-3.5 py-2 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-semibold flex items-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-[17px]">mood</span>
+              <span className="material-symbols-outlined text-[17px]">add_reaction</span>
               <span>React</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => setPrivacyModalOpen(true)}
+              title="Security & Encryption Specs"
+              className="p-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors"
+            >
+              <span className="material-symbols-outlined text-[17px]">shield</span>
+            </button>
+
+            <div className="h-6 w-[1px] bg-surface-container-high mx-0.5" />
 
             <button
               type="button"
@@ -593,7 +678,7 @@ export const MeetingsPage: React.FC = () => {
                 setMeetingSubView('notes');
                 notify('Left WebRTC chamber cleanly. Transcript saved to Vault.', 'info');
               }}
-              className="px-4 py-2 rounded-full bg-error text-on-error font-label-md text-label-md font-bold flex items-center gap-1.5 hover:opacity-90"
+              className="px-4 py-2 rounded-full bg-error text-on-error font-label-md text-label-md font-bold flex items-center gap-1.5 hover:opacity-90 shadow-sm"
             >
               <span className="material-symbols-outlined text-[17px]">call_end</span>
               <span>Leave</span>

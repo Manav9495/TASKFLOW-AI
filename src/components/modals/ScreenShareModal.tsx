@@ -177,26 +177,26 @@ export const ScreenShareModal: React.FC = () => {
                       : 'border-surface-container bg-surface-container-lowest hover:border-surface-container-highest'
                   }`}
                 >
-                  <div className="relative h-36 rounded-xl bg-inverse-surface overflow-hidden p-3 flex flex-col justify-between">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[11px] bg-black/40 text-inverse-on-surface px-2 py-0.5 rounded-md">
+                  <div className="relative aspect-[16/10] w-full rounded-lg bg-inverse-surface overflow-hidden p-2.5 flex flex-col justify-between border border-outline-variant/30">
+                    <div className="flex items-center justify-between relative z-10">
+                      <span className="font-mono text-[10px] bg-inverse-surface/90 text-inverse-on-surface px-2 py-0.5 rounded-md">
                         {item.res}
                       </span>
                       <span
-                        className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                        className={`w-5 h-5 rounded-full flex items-center justify-center shadow-sm ${
                           isSelected
                             ? 'bg-primary-container text-on-primary-container'
-                            : 'border border-white/40'
+                            : 'border border-outline-variant'
                         }`}
                       >
                         {isSelected && (
-                          <span className="material-symbols-outlined text-[14px]">check</span>
+                          <span className="material-symbols-outlined text-[14px] font-bold">check</span>
                         )}
                       </span>
                     </div>
 
                     {/* Visual miniature diagram preview */}
-                    <div className="my-auto flex items-center justify-center opacity-80">
+                    <div className="my-auto flex items-center justify-center opacity-85 relative z-10">
                       {item.primary ? (
                         <svg className="w-40 h-16 text-primary-container" viewBox="0 0 180 70" fill="none">
                           <rect x="6" y="10" width="42" height="24" rx="4" stroke="currentColor" strokeOpacity="0.6" />
@@ -205,16 +205,19 @@ export const ScreenShareModal: React.FC = () => {
                           <path d="M48 22H68M110 22H130M27 34V52H151V34" stroke="currentColor" strokeDasharray="3 3" strokeOpacity="0.5" />
                         </svg>
                       ) : (
-                        <div className="border border-dashed border-white/25 rounded-lg px-4 py-2 text-center">
-                          <span className="font-mono text-[11px] text-inverse-on-surface/70">
+                        <div className="border border-dashed border-outline-variant/40 rounded px-5 py-2.5 text-center bg-inverse-surface/60">
+                          <span className="material-symbols-outlined text-[24px] text-on-surface-variant/70 block">
+                            laptop_chromebook
+                          </span>
+                          <span className="font-mono text-[10px] text-inverse-on-surface/70">
                             Secondary Display Active
                           </span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-[11px] text-inverse-on-surface font-medium truncate">
-                      {item.primary && <span className="w-2 h-2 rounded-full bg-primary-container" />}
+                    <div className="flex items-center gap-1.5 text-[11px] text-inverse-on-surface font-medium truncate relative z-10">
+                      {item.primary && <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />}
                       <span className="truncate">{item.overlay}</span>
                     </div>
                   </div>
