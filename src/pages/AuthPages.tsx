@@ -4,6 +4,103 @@ import { TaskflowLogoMark } from '../components/common/BrandLogos';
 import { AVATARS } from '../data/mockWorkspace';
 import { Avatar } from '../components/common/Avatar';
 
+interface AuthShellProps {
+  mode: 'login' | 'signup';
+  children: React.ReactNode;
+}
+
+const AuthShell: React.FC<AuthShellProps> = ({ mode, children }) => {
+  const { navigate, notify } = useWorkspace();
+
+  return (
+    <div className="min-h-screen bg-surface flex flex-col text-on-surface">
+      {/* Compact Brand Header */}
+      <header className="w-full border-b border-surface-container bg-surface-container-lowest/75 backdrop-blur-md">
+        <div className="w-full max-w-[1580px] mx-auto px-4 md:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={() => navigate('dashboard')}
+            className="flex items-center gap-2.5 shrink-0"
+          >
+            <TaskflowLogoMark />
+            <span className="font-headline-sm text-headline-sm font-bold text-on-surface">
+              Taskflow<span className="text-primary ml-0.5">AI</span>
+            </span>
+            <span className="hidden sm:inline-block font-label-sm text-label-sm bg-surface-container px-2.5 py-0.5 rounded-full text-on-surface-variant font-medium">
+              v2.4 Local-first
+            </span>
+          </button>
+
+          <div className="flex items-center gap-2.5">
+            <div className="hidden sm:flex items-center p-0.5 rounded-full bg-surface-container">
+              <button
+                type="button"
+                onClick={() => navigate('login')}
+                className={`px-3.5 py-1 rounded-full font-label-sm text-label-sm transition-all ${
+                  mode === 'login'
+                    ? 'bg-surface-container-lowest text-on-surface font-semibold shadow-sm'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('signup')}
+                className={`px-3.5 py-1 rounded-full font-label-sm text-label-sm transition-all ${
+                  mode === 'signup'
+                    ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                Create Workspace
+              </button>
+            </div>
+
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-low shadow-sm font-label-sm text-label-sm font-semibold text-primary whitespace-nowrap">
+              <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />
+              <span className="material-symbols-outlined text-[15px]">lock</span>
+              Vault 256-AES Active
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Split Bento Stage */}
+      <main className="flex-1 w-full max-w-[1580px] mx-auto px-4 md:px-6 lg:px-8 py-5 flex items-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">{children}</div>
+      </main>
+
+      {/* Compact Enclave Footer Strip */}
+      <footer className="w-full border-t border-surface-container bg-surface-container-lowest/70 py-3">
+        <div className="w-full max-w-[1580px] mx-auto px-4 md:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3 text-on-surface-variant font-label-sm text-label-sm">
+          <span>© 2025 Taskflow AI • Zero-Knowledge AES-256-GCM Local Vault</span>
+          <div className="flex items-center gap-5">
+            <button
+              type="button"
+              onClick={() => notify('All cryptography executes locally with 0 bytes outbound.')}
+              className="hover:text-on-surface transition-colors"
+            >
+              Security &amp; Privacy
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('dashboard')}
+              className="hover:text-on-surface transition-colors"
+            >
+              Back to Workspace
+            </button>
+            <span className="inline-flex items-center gap-1.5 text-primary font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-container" />
+              0 bytes cloud egress
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
 export const SignInPage: React.FC = () => {
   const { navigate, notify } = useWorkspace();
   const [email, setEmail] = useState('alex.vance@arc-enterprise.io');
@@ -19,130 +116,108 @@ export const SignInPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-between">
-      {/* Minimal Auth Header */}
-      <header className="w-full max-w-[1440px] mx-auto px-6 py-4 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => navigate('dashboard')}
-          className="flex items-center gap-2.5"
-        >
-          <TaskflowLogoMark />
-          <span className="font-headline-sm text-headline-sm font-bold text-on-surface">
-            Taskflow<span className="text-primary ml-0.5">AI</span>
-          </span>
-        </button>
-        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-lowest shadow-sm font-label-sm text-label-sm font-semibold text-primary">
-          <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />
-          <span className="material-symbols-outlined text-[15px]">lock</span>
-          Vault 256-AES Active
-        </span>
-      </header>
+    <AuthShell mode="login">
+      {/* Left Interactive Demo Panel (7 cols) */}
+      <div className="lg:col-span-7 bg-surface-container-low/80 rounded-3xl p-6 lg:p-7 border border-surface-container flex flex-col justify-between gap-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-primary-container/60 text-on-primary-container font-code-inline text-[11px] font-bold">
+              • LIVE DEMO
+            </span>
+            <span className="font-label-md text-label-md font-semibold text-on-surface">
+              Autonomous Meeting &amp; Sprint Sync
+            </span>
+          </div>
+          <div className="flex items-center gap-2 font-code-inline text-[11px] text-primary">
+            <span>Zero-Knowledge E2EE</span>
+            <span>•</span>
+            <span>Whisper Active</span>
+          </div>
+        </div>
 
-      {/* Main Auth Grid */}
-      <main className="w-full max-w-[1320px] mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        {/* Left Interactive Demo Panel (7 cols) */}
-        <div className="lg:col-span-7 bg-surface-container-low/80 rounded-3xl p-6 space-y-5 border border-surface-container">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-primary-container/60 text-on-primary-container font-code-inline text-[11px] font-bold">
-                • LIVE DEMO
-              </span>
-              <span className="font-label-md text-label-md font-semibold text-on-surface">
-                Autonomous Meeting &amp; Sprint Sync
-              </span>
-            </div>
-            <div className="flex items-center gap-2 font-code-inline text-[11px] text-primary">
-              <span>Zero-Knowledge E2EE</span>
-              <span>•</span>
-              <span>Whisper Active</span>
-            </div>
+        <div className="relative flex-1 min-h-[260px] rounded-2xl bg-[#10202e] overflow-hidden p-5 lg:p-6 flex flex-col justify-between shadow-lg">
+          <div className="flex items-center justify-between text-[11px] font-mono text-white/80">
+            <span>Node: Local_Chamber_04</span>
+            <span className="px-2 py-0.5 rounded bg-primary/80 text-white">1080p • 60fps RAW</span>
           </div>
 
-          <div className="relative rounded-2xl bg-[#10202e] h-72 overflow-hidden p-5 flex flex-col justify-between shadow-lg">
-            <div className="flex items-center justify-between text-[11px] font-mono text-white/80">
-              <span>Node: Local_Chamber_04</span>
-              <span className="px-2 py-0.5 rounded bg-primary/80 text-white">1080p • 60fps RAW</span>
-            </div>
-
-            <div className="my-auto flex flex-col items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setDemoPlaying((p) => !p)}
-                aria-label={demoPlaying ? 'Pause walkthrough demo' : 'Play walkthrough demo'}
-                className="w-16 h-16 rounded-full bg-white text-primary flex items-center justify-center shadow-2xl hover:scale-105 transition-transform"
-              >
-                <span className="material-symbols-outlined text-[32px]">
-                  {demoPlaying ? 'pause' : 'play_arrow'}
-                </span>
-              </button>
-              <span className="font-code-inline text-xs text-primary-fixed">
-                {demoPlaying ? 'Streaming CRDT Local-First Demo...' : 'Click to preview Vault Walkthrough'}
+          <div className="my-auto flex flex-col items-center justify-center gap-3 py-6">
+            <button
+              type="button"
+              onClick={() => setDemoPlaying((p) => !p)}
+              aria-label={demoPlaying ? 'Pause walkthrough demo' : 'Play walkthrough demo'}
+              className="w-16 h-16 rounded-full bg-white text-primary flex items-center justify-center shadow-2xl hover:scale-105 transition-transform"
+            >
+              <span className="material-symbols-outlined text-[32px]">
+                {demoPlaying ? 'pause' : 'play_arrow'}
               </span>
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="w-full h-1.5 bg-white/15 rounded-full overflow-hidden">
-                <div
-                  className="bg-primary-container h-full rounded-full transition-all duration-500"
-                  style={{ width: demoPlaying ? '68%' : '42%' }}
-                />
-              </div>
-              <div className="flex justify-between font-code-inline text-[10px] text-white/70">
-                <span>{demoPlaying ? '02:44' : '01:42'} / 04:15</span>
-                <span className="text-primary-container">Latency: 12ms</span>
-              </div>
-            </div>
+            </button>
+            <span className="font-code-inline text-xs text-primary-fixed">
+              {demoPlaying ? 'Streaming CRDT Local-First Demo...' : 'Click to preview Vault Walkthrough'}
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-secondary-container/40 text-primary flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined">bolt</span>
-              </div>
-              <div>
-                <p className="font-headline-md text-headline-md font-bold text-on-surface">
-                  99.98%
-                </p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant">
-                  Local-First Engine Uptime
-                </p>
-              </div>
+          <div className="space-y-1.5">
+            <div className="w-full h-1.5 bg-white/15 rounded-full overflow-hidden">
+              <div
+                className="bg-primary-container h-full rounded-full transition-all duration-500"
+                style={{ width: demoPlaying ? '68%' : '42%' }}
+              />
             </div>
-            <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-secondary-container/40 text-primary flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined">cloud_off</span>
-              </div>
-              <div>
-                <p className="font-headline-md text-headline-md font-bold text-on-surface">Zero</p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant">
-                  Cloud Egress &amp; PII Storage
-                </p>
-              </div>
+            <div className="flex justify-between font-code-inline text-[10px] text-white/70">
+              <span>{demoPlaying ? '02:44' : '01:42'} / 04:15</span>
+              <span className="text-primary-container">Latency: 12ms</span>
             </div>
           </div>
+        </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex items-center gap-3">
-            <Avatar
-              src={AVATARS.alex}
-              alt="Alex Vance"
-              initials="AV"
-              className="w-10 h-10 rounded-full object-cover shrink-0"
-            />
+            <div className="w-10 h-10 rounded-xl bg-secondary-container/40 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined">bolt</span>
+            </div>
             <div>
-              <p className="font-body-sm text-body-sm italic text-on-surface">
-                &ldquo;Taskflow AI eliminated 14+ hours of manual meeting recaps each week across our
-                250-node engineering org.&rdquo;
+              <p className="font-headline-md text-headline-md font-bold text-on-surface">99.98%</p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">
+                Local-First Engine Uptime
               </p>
-              <p className="font-label-sm text-label-sm font-bold text-on-surface mt-1">
-                Alex Vance • <span className="font-normal text-outline">VP of Infrastructure, Arc Co.</span>
+            </div>
+          </div>
+          <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-secondary-container/40 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined">cloud_off</span>
+            </div>
+            <div>
+              <p className="font-headline-md text-headline-md font-bold text-on-surface">Zero</p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">
+                Cloud Egress &amp; PII Storage
               </p>
             </div>
           </div>
         </div>
 
-        {/* Right Sign-In Form Card (5 cols) */}
-        <div className="lg:col-span-5 bg-surface-container-lowest rounded-3xl p-8 shadow-md space-y-5">
+        <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex items-center gap-3">
+          <Avatar
+            src={AVATARS.alex}
+            alt="Alex Vance"
+            initials="AV"
+            className="w-10 h-10 rounded-full object-cover shrink-0"
+          />
+          <div>
+            <p className="font-body-sm text-body-sm italic text-on-surface">
+              &ldquo;Taskflow AI eliminated 14+ hours of manual meeting recaps each week across our
+              250-node engineering org.&rdquo;
+            </p>
+            <p className="font-label-sm text-label-sm font-bold text-on-surface mt-1">
+              Alex Vance • <span className="font-normal text-outline">VP of Infrastructure, Arc Co.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Sign-In Form Card (5 cols) */}
+      <div className="lg:col-span-5 bg-surface-container-lowest rounded-3xl p-6 lg:p-8 shadow-md border border-surface-container/60 flex flex-col justify-between gap-4">
+        <div className="space-y-4">
           <div>
             <span className="px-2.5 py-0.5 rounded-full bg-surface-container-low font-code-inline text-[11px] font-bold text-primary">
               • TASKFLOW AI ENTERPRISE v4.19
@@ -186,7 +261,7 @@ export const SignInPage: React.FC = () => {
             or continue with enterprise credentials
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
               <label
                 htmlFor="signin-email"
@@ -269,25 +344,25 @@ export const SignInPage: React.FC = () => {
               Sign In to Workspace →
             </button>
           </form>
-
-          <div className="text-center space-y-2 pt-1">
-            <p className="font-label-sm text-label-sm text-outline">
-              Protected by AES-256-GCM local-first storage &amp; biometric enclave.
-            </p>
-            <p className="font-label-md text-label-md text-on-surface-variant">
-              Don&apos;t have an enterprise account?{' '}
-              <button
-                type="button"
-                onClick={() => navigate('signup')}
-                className="text-primary font-bold hover:underline"
-              >
-                Sign up
-              </button>
-            </p>
-          </div>
         </div>
-      </main>
-    </div>
+
+        <div className="text-center space-y-1.5 pt-2 border-t border-surface-container-low">
+          <p className="font-label-sm text-label-sm text-outline">
+            Protected by AES-256-GCM local-first storage &amp; biometric enclave.
+          </p>
+          <p className="font-label-md text-label-md text-on-surface-variant">
+            Don&apos;t have an enterprise account?{' '}
+            <button
+              type="button"
+              onClick={() => navigate('signup')}
+              className="text-primary font-bold hover:underline"
+            >
+              Sign up
+            </button>
+          </p>
+        </div>
+      </div>
+    </AuthShell>
   );
 };
 
@@ -300,6 +375,7 @@ export const SignUpPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [region, setRegion] = useState('US-East (Local-First On-Device SQLite & Edge Sync)');
   const [agreed, setAgreed] = useState(true);
+  const [demoPlaying, setDemoPlaying] = useState(false);
   const [speed, setSpeed] = useState('1.0x');
 
   const strengthLevel = useMemo(() => {
@@ -316,28 +392,10 @@ export const SignUpPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-between">
-      <header className="w-full max-w-[1440px] mx-auto px-6 py-4 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => navigate('dashboard')}
-          className="flex items-center gap-2.5"
-        >
-          <TaskflowLogoMark />
-          <span className="font-headline-sm text-headline-sm font-bold text-on-surface">
-            Taskflow<span className="text-primary ml-0.5">AI</span>
-          </span>
-        </button>
-        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-lowest shadow-sm font-label-sm text-label-sm font-semibold text-primary">
-          <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />
-          <span className="material-symbols-outlined text-[15px]">lock</span>
-          Vault 256-AES Active
-        </span>
-      </header>
-
-      <main className="w-full max-w-[1360px] mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        {/* Left Onboarding Form (5 cols) */}
-        <div className="lg:col-span-5 bg-surface-container-lowest rounded-3xl p-8 shadow-md space-y-5">
+    <AuthShell mode="signup">
+      {/* Left Onboarding Form (5 cols) */}
+      <div className="lg:col-span-5 bg-surface-container-lowest rounded-3xl p-6 lg:p-7 shadow-md border border-surface-container/60 flex flex-col justify-between gap-4">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="font-code-inline text-[11px] font-bold text-primary">
               • TASKFLOW AI ENTERPRISE
@@ -363,7 +421,7 @@ export const SignUpPage: React.FC = () => {
                 notify('Provisioned workspace via Google SSO.');
                 navigate('dashboard');
               }}
-              className="py-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container font-label-md text-label-md font-semibold"
+              className="py-2 rounded-xl bg-surface-container-low hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors"
             >
               Google SSO
             </button>
@@ -373,13 +431,13 @@ export const SignUpPage: React.FC = () => {
                 notify('Provisioned workspace via Okta / SAML 2.0.');
                 navigate('dashboard');
               }}
-              className="py-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container font-label-md text-label-md font-semibold"
+              className="py-2 rounded-xl bg-surface-container-low hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors"
             >
               Okta / SAML 2.0
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label
@@ -504,7 +562,7 @@ export const SignUpPage: React.FC = () => {
               </select>
             </div>
 
-            <label className="flex items-start gap-2 text-label-sm font-label-sm text-on-surface-variant cursor-pointer pt-1">
+            <label className="flex items-start gap-2 text-label-sm font-label-sm text-on-surface-variant cursor-pointer pt-0.5">
               <input
                 type="checkbox"
                 required
@@ -528,56 +586,74 @@ export const SignUpPage: React.FC = () => {
               Create Local-First Workspace 🚀
             </button>
           </form>
-
-          <p className="text-center font-label-md text-label-md text-on-surface-variant">
-            Already have an enterprise account?{' '}
-            <button
-              type="button"
-              onClick={() => navigate('login')}
-              className="text-primary font-bold hover:underline"
-            >
-              Sign in
-            </button>
-          </p>
         </div>
 
-        {/* Right Interactive Product Demo Walkthrough (7 cols) */}
-        <div className="lg:col-span-7 bg-surface-container-low/80 rounded-3xl p-6 space-y-5 border border-surface-container">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-code-inline text-code-inline text-on-surface font-semibold">
-              DEMO_CLUSTER://live-instance-04.local
+        <p className="text-center font-label-md text-label-md text-on-surface-variant pt-2 border-t border-surface-container-low">
+          Already have an enterprise account?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('login')}
+            className="text-primary font-bold hover:underline"
+          >
+            Sign in
+          </button>
+        </p>
+      </div>
+
+      {/* Right Interactive Product Demo Walkthrough (7 cols) */}
+      <div className="lg:col-span-7 bg-surface-container-low/80 rounded-3xl p-6 lg:p-7 border border-surface-container flex flex-col justify-between gap-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="font-code-inline text-code-inline text-on-surface font-semibold">
+            DEMO_CLUSTER://live-instance-04.local
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded bg-secondary-container/60 text-on-secondary-container font-code-inline text-[10px] font-bold">
+              CRDT SYNC ACTIVE
             </span>
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded bg-secondary-container/60 text-on-secondary-container font-code-inline text-[10px] font-bold">
-                CRDT SYNC ACTIVE
-              </span>
-              <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-code-inline text-[10px] font-bold">
-                4K 60fps HDR
-              </span>
-            </div>
+            <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-code-inline text-[10px] font-bold">
+              4K 60fps HDR
+            </span>
+          </div>
+        </div>
+
+        <div className="flex-1 min-h-[280px] rounded-2xl bg-[#10202e] p-5 lg:p-6 flex flex-col justify-between shadow-lg">
+          <div className="flex items-center justify-between text-[11px] font-mono text-white">
+            <span className="px-2.5 py-1 rounded-full bg-black/40">
+              • Manav.AI Autonomous Agent {demoPlaying ? 'Streaming' : 'Working'}
+            </span>
+            <span className="px-2.5 py-1 rounded-full bg-black/40 text-primary-container">
+              0.04ms LATENCY
+            </span>
           </div>
 
-          <div className="rounded-2xl bg-[#10202e] h-72 p-5 flex flex-col justify-between shadow-lg">
-            <div className="flex items-center justify-between text-[11px] font-mono text-white">
-              <span className="px-2.5 py-1 rounded-full bg-black/40">
-                • Manav.AI Autonomous Agent Working
+          <div className="my-auto text-center space-y-2.5 py-6">
+            <button
+              type="button"
+              onClick={() => setDemoPlaying((p) => !p)}
+              aria-label={demoPlaying ? 'Pause product demo' : 'Play product demo'}
+              className="inline-flex w-14 h-14 rounded-full bg-primary text-white items-center justify-center shadow-xl hover:scale-105 transition-transform"
+            >
+              <span className="material-symbols-outlined text-[28px]">
+                {demoPlaying ? 'pause' : 'play_arrow'}
               </span>
-              <span className="px-2.5 py-1 rounded-full bg-black/40 text-primary-container">
-                0.04ms LATENCY
-              </span>
-            </div>
+            </button>
+            <p className="font-label-md text-label-md text-white font-semibold">
+              Interactive Product Demo Walkthrough
+            </p>
+            <p className="font-code-inline text-[11px] text-primary-fixed">
+              {demoPlaying ? 'Playing encrypted P2P chamber preview...' : 'Click play to preview local SQLite + CRDT sync'}
+            </p>
+          </div>
 
-            <div className="my-auto text-center space-y-2">
-              <div className="inline-flex w-14 h-14 rounded-full bg-primary text-white items-center justify-center shadow-xl">
-                <span className="material-symbols-outlined text-[28px]">play_arrow</span>
-              </div>
-              <p className="font-label-md text-label-md text-white font-semibold">
-                Interactive Product Demo Walkthrough
-              </p>
+          <div className="space-y-1.5">
+            <div className="w-full h-1.5 bg-white/15 rounded-full overflow-hidden">
+              <div
+                className="bg-primary-container h-full rounded-full transition-all duration-500"
+                style={{ width: demoPlaying ? '58%' : '26%' }}
+              />
             </div>
-
             <div className="flex items-center justify-between text-[11px] font-mono text-white/75">
-              <span>00:48 / 03:38</span>
+              <span>{demoPlaying ? '02:06' : '00:48'} / 03:38</span>
               <button
                 type="button"
                 onClick={() => setSpeed((s) => (s === '1.0x' ? '1.5x' : '1.0x'))}
@@ -587,49 +663,47 @@ export const SignUpPage: React.FC = () => {
               </button>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              {
-                icon: 'forum',
-                title: 'Chambers',
-                desc: 'Autonomous meeting recaps & live edge transcription.',
-              },
-              {
-                icon: 'calendar_month',
-                title: 'Multi-Calendar',
-                desc: 'Deep focus shielding with scheduled zero-interruption locks.',
-              },
-              {
-                icon: 'database',
-                title: 'Zero Telemetry',
-                desc: '100% on-device SQLite storage with cryptographic integrity.',
-              },
-            ].map((f) => (
-              <div key={f.title} className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm">
-                <span className="material-symbols-outlined text-primary text-[18px]">
-                  {f.icon}
-                </span>
-                <p className="font-label-md text-label-md font-bold text-on-surface mt-1.5">
-                  {f.title}
-                </p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
-                  {f.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-2xl px-4 py-3 shadow-sm flex flex-wrap items-center justify-between gap-2 text-label-sm font-label-sm">
-            <span className="font-semibold text-on-surface">
-              Trusted by teams at 450+ scale-ups
-            </span>
-            <span className="font-code-inline text-outline font-bold tracking-widest">
-              POLYGON • KINETIC • SYNAPSE
-            </span>
-          </div>
         </div>
-      </main>
-    </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            {
+              icon: 'forum',
+              title: 'Chambers',
+              desc: 'Autonomous meeting recaps & live edge transcription.',
+            },
+            {
+              icon: 'calendar_month',
+              title: 'Multi-Calendar',
+              desc: 'Deep focus shielding with scheduled zero-interruption locks.',
+            },
+            {
+              icon: 'database',
+              title: 'Zero Telemetry',
+              desc: '100% on-device SQLite storage with cryptographic integrity.',
+            },
+          ].map((f) => (
+            <div key={f.title} className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm">
+              <span className="material-symbols-outlined text-primary text-[18px]">
+                {f.icon}
+              </span>
+              <p className="font-label-md text-label-md font-bold text-on-surface mt-1.5">
+                {f.title}
+              </p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
+                {f.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-surface-container-lowest rounded-2xl px-4 py-3 shadow-sm flex flex-wrap items-center justify-between gap-2 text-label-sm font-label-sm">
+          <span className="font-semibold text-on-surface">Trusted by teams at 450+ scale-ups</span>
+          <span className="font-code-inline text-outline font-bold tracking-widest">
+            POLYGON • KINETIC • SYNAPSE
+          </span>
+        </div>
+      </div>
+    </AuthShell>
   );
 };
